@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mines Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            max-width: 900px;
+            width: 100%;
+            border: 1px solid #2a2a2a;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .warning-banner {
+            background: #4a4a4a;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 0;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.85em;
+            border-left: 4px solid #fbbf24;
+        }
+
+        .warning-title {
+            color: #fbbf24;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 2px;
+            font-size: 0.95em;
+        }
+
+        .warning-subtitle {
+            font-size: 0.85em;
+            font-weight: normal;
+            color: #ccc;
+        }
+
+        .creator {
+            font-size: 0.75em;
+            margin-top: 15px;
+            opacity: 0.6;
+            color: #fff;
+            text-align: center;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .tile {
+            width: 70px;
+            height: 70px;
+            background: #2a2a2a;
+            border: 2px solid #3a3a3a;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .tile:hover:not(.revealed):not(.disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+            background: #3a3a3a;
+            border-color: #667eea;
+        }
+
+        .tile.revealed.safe {
+            background: linear-gradient(145deg, #4ade80, #22c55e);
+            color: white;
+            border-color: #16a34a;
+        }
+
+        .tile.revealed.mine {
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+            color: white;
+            border-color: #991b1b;
+        }
+
+        .tile.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .controls {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #2a2a2a;
+        }
+
+        .stat {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #3a3a3a;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ccc;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #3a3a3a;
+            border-radius: 8px;
+            font-size: 1em;
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .btn-start {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-cashout {
+            background: linear-gradient(145deg, #4ade80, #22c55e);
+            color: white;
+        }
+
+        .btn-cashout:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(34, 197, 94, 0.4);
+        }
+
+        .btn-promo {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+            color: white;
+            white-space: nowrap;
+        }
+
+        .btn-promo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(139, 92, 246, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.win {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #22c55e;
+        }
+
+        .message.lose {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+
+            .tile {
+                width: 55px;
+                height: 55px;
+                font-size: 1.5em;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="warning-banner">
+            <div class="warning-title">⚠️ FREE PLAY ONLY</div>
+            <div class="warning-subtitle">Virtual chips have no real value</div>
+        </div>
+        
+        <h1>💣 MINES GAME 💎</h1>
+        
+        <div class="game-area">
+            <div class="board-container">
+                <div class="board" id="board"></div>
+                <div class="message" id="message"></div>
+            </div>
+
+            <div class="controls">
+                <div class="stat">
+                    <div class="stat-label">Balance</div>
+                    <div class="stat-value" id="balance">$1000.00</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-label">Current Multiplier</div>
+                    <div class="stat-value" id="multiplier">1.00x</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-label">Potential Win</div>
+                    <div class="stat-value" id="potential">$0.00</div>
+                </div>
+
+                <div class="input-group">
+                    <label>Bet Amount</label>
+                    <input type="number" id="betAmount" value="10" min="1" step="1">
+                </div>
+
+                <div class="input-group">
+                    <label>Number of Mines</label>
+                    <select id="mineCount">
+                        <option value="1">1 Mine (Easy)</option>
+                        <option value="3" selected>3 Mines (Medium)</option>
+                        <option value="5">5 Mines (Hard)</option>
+                        <option value="10">10 Mines (Extreme)</option>
+                        <option value="15">15 Mines (Insane)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Redeem Code</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="promoCode" placeholder="Enter code">
+                        <button class="btn-promo" id="redeemBtn">Redeem</button>
+                    </div>
+                </div>
+
+                <button class="btn-start" id="startBtn">Start Game</button>
+                <button class="btn-cashout" id="cashoutBtn" disabled>Cash Out</button>
+                
+                <div class="creator">Made by Tony</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_TILES = 25;
+        const HOUSE_EDGE_BASE = 0.15; // 15% house edge for early clicks
+        const HOUSE_EDGE_MIN = 0.04; // 4% house edge for deep runs
+        const CURVE_FACTOR = 0.88; // Non-linear curve to nerf early clicks
+
+        let balance = 0;
+        let currentBet = 0;
+        let mineCount = 3;
+        let board = [];
+        let revealed = [];
+        let gameActive = false;
+        let clickCount = 0;
+        let multiplier = 1.0;
+
+        const boardEl = document.getElementById('board');
+        const balanceEl = document.getElementById('balance');
+        const multiplierEl = document.getElementById('multiplier');
+        const potentialEl = document.getElementById('potential');
+        const startBtn = document.getElementById('startBtn');
+        const cashoutBtn = document.getElementById('cashoutBtn');
+        const messageEl = document.getElementById('message');
+        const betAmountInput = document.getElementById('betAmount');
+        const mineCountSelect = document.getElementById('mineCount');
+        const promoCodeInput = document.getElementById('promoCode');
+        const redeemBtn = document.getElementById('redeemBtn');
+
+        // Promo codes
+        const promoCodes = {
+            'TONY': 1000
+        };
+
+        const usedCodes = new Set();
+
+        function initBoard() {
+            boardEl.innerHTML = '';
+            for (let i = 0; i < TOTAL_TILES; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.dataset.index = i;
+                tile.addEventListener('click', () => handleTileClick(i));
+                boardEl.appendChild(tile);
+            }
+        }
+
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function calculateMultiplier(clicks, mines) {
+            const safeTiles = TOTAL_TILES - mines;
+            let prob = 1;
+            
+            // Calculate true probability of surviving this many clicks
+            for (let i = 0; i < clicks; i++) {
+                prob *= (safeTiles - i) / (TOTAL_TILES - i);
+            }
+            
+            // Fair multiplier (1 / probability)
+            const fairMultiplier = 1 / prob;
+            
+            // Dynamic house edge that decreases as you click more
+            // Early clicks have high house edge, later clicks have lower edge
+            const progressRatio = clicks / safeTiles; // 0 to 1
+            const houseEdge = HOUSE_EDGE_BASE - (HOUSE_EDGE_BASE - HOUSE_EDGE_MIN) * progressRatio;
+            
+            // Apply curve factor to nerf early multipliers more aggressively
+            const curvedMultiplier = Math.pow(fairMultiplier, CURVE_FACTOR);
+            
+            // Apply house edge
+            const finalMultiplier = curvedMultiplier * (1 - houseEdge);
+            
+            // Ensure minimum multiplier of 1.0
+            return Math.max(1.0, finalMultiplier);
+        }
+
+        function startGame() {
+            const betAmount = parseFloat(betAmountInput.value);
+            
+            if (betAmount <= 0 || betAmount > balance) {
+                showMessage('Invalid bet amount!', 'lose');
+                return;
+            }
+
+            balance -= betAmount;
+            currentBet = betAmount;
+            mineCount = parseInt(mineCountSelect.value);
+            
+            // Create board with mines
+            board = shuffle([
+                ...Array(mineCount).fill('MINE'),
+                ...Array(TOTAL_TILES - mineCount).fill('SAFE')
+            ]);
+            
+            revealed = Array(TOTAL_TILES).fill(false);
+            gameActive = true;
+            clickCount = 0;
+            multiplier = 1.0;
+
+            updateDisplay();
+            initBoard();
+            
+            startBtn.disabled = true;
+            cashoutBtn.disabled = false;
+            betAmountInput.disabled = true;
+            mineCountSelect.disabled = true;
+            messageEl.className = 'message';
+        }
+
+        function handleTileClick(index) {
+            if (!gameActive || revealed[index]) return;
+
+            revealed[index] = true;
+            const tile = boardEl.children[index];
+            
+            if (board[index] === 'MINE') {
+                tile.className = 'tile revealed mine';
+                tile.textContent = '💣';
+                endGame(false);
+            } else {
+                tile.className = 'tile revealed safe';
+                tile.textContent = '💎';
+                clickCount++;
+                multiplier = calculateMultiplier(clickCount, mineCount);
+                updateDisplay();
+                
+                // Auto win if all safe tiles revealed
+                if (clickCount === TOTAL_TILES - mineCount) {
+                    endGame(true);
+                }
+            }
+        }
+
+        function cashOut() {
+            if (!gameActive) return;
+            endGame(true);
+        }
+
+        function endGame(won) {
+            gameActive = false;
+            
+            // Reveal all tiles
+            boardEl.querySelectorAll('.tile').forEach((tile, i) => {
+                tile.classList.add('disabled');
+                if (!revealed[i]) {
+                    if (board[i] === 'MINE') {
+                        tile.textContent = '💣';
+                        tile.style.opacity = '0.5';
+                    }
+                }
+            });
+
+            if (won) {
+                const winAmount = currentBet * multiplier;
+                balance += winAmount;
+                showMessage(`You won $${winAmount.toFixed(2)}!`, 'win');
+            } else {
+                showMessage(`You hit a mine! Lost $${currentBet.toFixed(2)}`, 'lose');
+            }
+
+            startBtn.disabled = false;
+            cashoutBtn.disabled = true;
+            betAmountInput.disabled = false;
+            mineCountSelect.disabled = false;
+            multiplier = 1.0;
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            balanceEl.textContent = `$${balance.toFixed(2)}`;
+            multiplierEl.textContent = `${multiplier.toFixed(2)}x`;
+            const potential = currentBet * multiplier;
+            potentialEl.textContent = `$${potential.toFixed(2)}`;
+        }
+
+        function showMessage(text, type) {
+            messageEl.textContent = text;
+            messageEl.className = `message show ${type}`;
+        }
+
+        function redeemCode() {
+            const code = promoCodeInput.value.trim().toUpperCase();
+            
+            if (!code) {
+                showMessage('Please enter a code', 'lose');
+                return;
+            }
+
+            if (usedCodes.has(code)) {
+                showMessage('Code already used!', 'lose');
+                return;
+            }
+
+            if (promoCodes[code]) {
+                balance += promoCodes[code];
+                usedCodes.add(code);
+                updateDisplay();
+                showMessage(`Success! Added ${promoCodes[code]} to your balance!`, 'win');
+                promoCodeInput.value = '';
+            } else {
+                showMessage('Invalid code', 'lose');
+            }
+        }
+
+        startBtn.addEventListener('click', startGame);
+        cashoutBtn.addEventListener('click', cashOut);
+        redeemBtn.addEventListener('click', redeemCode);
+        promoCodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') redeemCode();
+        });
+
+        initBoard();
+        updateDisplay();
+    </script>
+</body>
+</html>
