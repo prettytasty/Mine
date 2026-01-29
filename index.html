@@ -351,7 +351,7 @@
         const HOUSE_EDGE_MIN = 0.04; // 4% house edge for deep runs
         const CURVE_FACTOR = 0.88; // Non-linear curve to nerf early clicks
 
-        let balance = 0;
+        let balance = 1000; // FIX #1: Initialize balance to 1000
         let currentBet = 0;
         let mineCount = 3;
         let board = [];
@@ -374,7 +374,12 @@
 
         // Promo codes
         const promoCodes = {
-            'TONY': 1000
+            'TONY': 1000,
+            'NR3': 3,
+            'LUCY': 1,
+            'MITCHEL': 100,
+            'JAIDEN': 69,
+            'SUPERMEGABLANCE': 9999
         };
 
         const usedCodes = new Set();
@@ -547,7 +552,7 @@
                 balance += promoCodes[code];
                 usedCodes.add(code);
                 updateDisplay();
-                showMessage(`Success! Added ${promoCodes[code]} to your balance!`, 'win');
+                showMessage(`Success! Added $${promoCodes[code]} to your balance!`, 'win');
                 promoCodeInput.value = '';
             } else {
                 showMessage('Invalid code', 'lose');
@@ -567,4 +572,3 @@
 </body>
 
 </html>
-
