@@ -21,6 +21,7 @@
     .warning-title { color:#fbbf24; font-weight:bold; display:flex; justify-content:center; gap:8px; margin-bottom:2px; font-size:0.95em; }
     .warning-subtitle { font-size:0.85em; color:#ccc; }
     .creator { font-size:0.75em; margin-top:15px; opacity:0.6; color:#fff; text-align:center; }
+    .version { position:fixed; top:10px; right:10px; font-size:0.8em; color:#888; opacity:0.7; background:#1a1a1a; padding:5px 10px; border-radius:5px; border:1px solid #2a2a2a; }
     .game-area { display:grid; grid-template-columns:1fr 300px; gap:30px; margin-top:20px; }
     .board-container { display:flex; flex-direction:column; align-items:center; }
     .board { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
@@ -53,6 +54,7 @@
 </style>
 </head>
 <body>
+<div class="version">Fix 3.1</div>
 <div class="container">
     <div class="warning-banner">
         <div class="warning-title">⚠️ FREE PLAY ONLY</div>
@@ -145,7 +147,8 @@ const promoCodes = {
     'LUCY': 1,
     'MITCHEL': 100,
     'JAIDEN': 69,
-    'SUPERMEGABLANCE': 9999
+    'EESA': 67,
+    'SUPERMEGABALANCE': 9999
 };
 const usedCodes = new Set();
 
@@ -171,7 +174,14 @@ function calculateMultiplier(clicks,mines){
     const progressRatio=clicks/safeTiles;
     const houseEdge=HOUSE_EDGE_BASE-(HOUSE_EDGE_BASE-HOUSE_EDGE_MIN)*progressRatio;
     const curvedMultiplier=Math.pow(fairMultiplier,CURVE_FACTOR);
-    return Math.max(1.0,curvedMultiplier*(1-houseEdge));
+    let finalMultiplier=Math.max(1.0,curvedMultiplier*(1-houseEdge));
+    
+    // 50% bonus for Insane difficulty (15 mines)
+    if(mines===15){
+        finalMultiplier*=1.5;
+    }
+    
+    return finalMultiplier;
 }
 
 // ---- Game logic ----
@@ -277,7 +287,5 @@ updateDisplay();
 </script>
 </body>
 </html>
-
-
 
 
